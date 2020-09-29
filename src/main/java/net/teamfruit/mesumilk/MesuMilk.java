@@ -18,15 +18,21 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class MesuMilk extends JavaPlugin implements Listener {
     // 牛乳が出る人
     private List<String> mesu = new ArrayList<>();
     // 水が出る人
     private List<String> water = new ArrayList<>();
+    // 精が出る人
+    private Map<String, Object> osu = new HashMap<>();
     // スコアボード (搾られた回数)
-    private Objective takeCount;
+    private Objective mesuCount;
+    // スコアボード (搾られた回数)
+    private Objective osuCount;
 
     @Override
     public void onEnable() {
@@ -35,9 +41,12 @@ public final class MesuMilk extends JavaPlugin implements Listener {
 
         // スコアボード
         Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
-        takeCount = sb.getObjective("mesumilk");
-        if (takeCount == null)
-            takeCount = sb.registerNewObjective("mesumilk", "dummy", "搾られた回数");
+        mesuCount = sb.getObjective("mesumilk");
+        if (mesuCount == null)
+            mesuCount = sb.registerNewObjective("mesumilk", "dummy", "搾られた回数");
+        osuCount = sb.getObjective("osumilk");
+        if (osuCount == null)
+            osuCount = sb.registerNewObjective("osumilk", "dummy", "搾られた回数");
 
         // メンバー読み込み
         @SuppressWarnings("unchecked")
@@ -47,6 +56,10 @@ public final class MesuMilk extends JavaPlugin implements Listener {
         @SuppressWarnings("unchecked")
         List<String> water = (List<String>) getConfig().getList("water");
         this.water = water;
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> osu = (Map<String, Object>) getConfig().getConfigurationSection("osu").getValues(false);
+        this.osu = osu;
     }
 
     @Override
@@ -91,10 +104,38 @@ public final class MesuMilk extends JavaPlugin implements Listener {
                 // パーティクル
                 getServer().dispatchCommand(getServer().getConsoleSender(),
                         "execute at " + target.getName() + " run particle minecraft:spit ~ ~ ~ 1 0 0 1 1000 force");
-
                 // スコア
-                Score sc = takeCount.getScore(target.getName());
+                Score sc = mesuCount.getScore(target.getName());
                 sc.setScore(sc.getScore() + 1);
+            } else {
+                // メスがバケツした場合のみ
+                boolean bMesuBy = mesu.contains(me.getName());
+                boolean bWaterBy = water.contains(me.getName());
+                if (bMesuBy || bWaterBy) {
+                    // ミルクを搾る音
+                    me.playSound(me.getLocation(), Sound.ENTITY_COW_MILK, 1, 1);
+
+                    // アイテム処理
+                    ItemStack milk = new ItemStack(Material.MILK_BUCKET);
+                    ItemMeta meta = milk.getItemMeta();
+                    meta.setDisplayName("§3" + target.getName() + " の牛乳");
+                    milk.setItemMeta(meta);
+                    bucket.setAmount(bucket.getAmount() - 1);
+                    if (inv.firstEmpty() == -1)
+                        me.getWorld().dropItem(me.getLocation(), milk);
+                    else
+                        inv.addItem(milk);
+
+                    Object osuObject = osu.get(target.getName());
+                    int osuAmount = (osuObject instanceof Integer) ? (Integer) osuObject : 100;
+
+                    // パーティクル
+                    getServer().dispatchCommand(getServer().getConsoleSender(),
+                            "execute at " + target.getName() + " anchored feet positioned ^ ^.5 ^.4 run particle minecraft:spit ^ ^ ^ 0 0 0 0 " + osuAmount + " normal");
+                    // スコア
+                    Score sc = osuCount.getScore(target.getName());
+                    sc.setScore(sc.getScore() + 1);
+                }
             }
         }
     }

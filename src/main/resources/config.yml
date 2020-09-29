@@ -2,3 +2,5 @@ mesu:
   - Dev
 water:
   - Dev2
+osu:
+  Dev3: 1000
