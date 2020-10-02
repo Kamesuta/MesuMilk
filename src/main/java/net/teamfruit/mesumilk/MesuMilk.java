@@ -29,6 +29,8 @@ public final class MesuMilk extends JavaPlugin implements Listener {
     private List<String> water = new ArrayList<>();
     // 精が出る人
     private Map<String, Object> osu = new HashMap<>();
+    // 溶岩が出る人
+    private List<String> lava = new ArrayList<>();
     // スコアボード (搾られた回数)
     private Objective mesuCount;
     // スコアボード (搾られた回数)
@@ -60,6 +62,10 @@ public final class MesuMilk extends JavaPlugin implements Listener {
         @SuppressWarnings("unchecked")
         Map<String, Object> osu = (Map<String, Object>) getConfig().getConfigurationSection("osu").getValues(false);
         this.osu = osu;
+
+        @SuppressWarnings("unchecked")
+        List<String> lava = (List<String>) getConfig().getList("lava");
+        this.lava = lava;
     }
 
     @Override
@@ -111,12 +117,13 @@ public final class MesuMilk extends JavaPlugin implements Listener {
                 // メスがバケツした場合のみ
                 boolean bMesuBy = mesu.contains(me.getName());
                 boolean bWaterBy = water.contains(me.getName());
-                if (bMesuBy || bWaterBy) {
+                boolean bLava = lava.contains(target.getName());
+                if (bMesuBy || bWaterBy || bLava) {
                     // ミルクを搾る音
                     me.playSound(me.getLocation(), Sound.ENTITY_COW_MILK, 1, 1);
 
                     // アイテム処理
-                    ItemStack milk = new ItemStack(Material.MILK_BUCKET);
+                    ItemStack milk = new ItemStack(bLava ? Material.LAVA_BUCKET : Material.MILK_BUCKET);
                     ItemMeta meta = milk.getItemMeta();
                     meta.setDisplayName("§3" + target.getName() + " の牛乳");
                     milk.setItemMeta(meta);

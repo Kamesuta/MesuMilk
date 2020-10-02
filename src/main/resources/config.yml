@@ -4,3 +4,5 @@ water:
   - Dev2
 osu:
   Dev3: 1000
+lava:
+  - Dev4
