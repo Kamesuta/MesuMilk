@@ -35,6 +35,10 @@ public final class MesuMilk extends JavaPlugin implements Listener {
     private Objective mesuCount;
     // スコアボード (搾られた回数)
     private Objective osuCount;
+    // スコアボード (搾った回数)
+    private Objective mesuGetCount;
+    // スコアボード (搾った回数)
+    private Objective osuGetCount;
 
     @Override
     public void onEnable() {
@@ -45,10 +49,16 @@ public final class MesuMilk extends JavaPlugin implements Listener {
         Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
         mesuCount = sb.getObjective("mesumilk");
         if (mesuCount == null)
-            mesuCount = sb.registerNewObjective("mesumilk", "dummy", "搾られた回数");
+            mesuCount = sb.registerNewObjective("mesumilk", "dummy", "メス搾られた回数");
         osuCount = sb.getObjective("osumilk");
         if (osuCount == null)
-            osuCount = sb.registerNewObjective("osumilk", "dummy", "搾られた回数");
+            osuCount = sb.registerNewObjective("osumilk", "dummy", "オス搾られた回数");
+        mesuGetCount = sb.getObjective("mesugetmilk");
+        if (mesuGetCount == null)
+            mesuGetCount = sb.registerNewObjective("mesugetmilk", "dummy", "メス搾った回数");
+        osuGetCount = sb.getObjective("osugetmilk");
+        if (osuGetCount == null)
+            osuGetCount = sb.registerNewObjective("osugetmilk", "dummy", "オス搾った回数");
 
         // メンバー読み込み
         @SuppressWarnings("unchecked")
@@ -110,10 +120,13 @@ public final class MesuMilk extends JavaPlugin implements Listener {
                 // パーティクル
                 getServer().dispatchCommand(getServer().getConsoleSender(),
                         "execute at " + target.getName() + " run particle minecraft:spit ~ ~ ~ 1 0 0 1 1000 force");
-                // スコア
+                // スコア (搾られた)
                 Score sc = mesuCount.getScore(target.getName());
                 sc.setScore(sc.getScore() + 1);
-            } else {
+                // スコア (搾った)
+                Score scget = mesuGetCount.getScore(me.getName());
+                scget.setScore(scget.getScore() + 1);
+            } else if (getConfig().getBoolean("enable_osu", true)) {
                 // メスがバケツした場合のみ
                 boolean bMesuBy = mesu.contains(me.getName());
                 boolean bWaterBy = water.contains(me.getName());
@@ -139,9 +152,12 @@ public final class MesuMilk extends JavaPlugin implements Listener {
                     // パーティクル
                     getServer().dispatchCommand(getServer().getConsoleSender(),
                             "execute at " + target.getName() + " anchored feet positioned ^ ^.5 ^.4 run particle minecraft:spit ^ ^ ^ 0 0 0 0 " + osuAmount + " normal");
-                    // スコア
+                    // スコア (搾られた)
                     Score sc = osuCount.getScore(target.getName());
                     sc.setScore(sc.getScore() + 1);
+                    // スコア (搾った)
+                    Score scget = osuGetCount.getScore(me.getName());
+                    scget.setScore(scget.getScore() + 1);
                 }
             }
         }

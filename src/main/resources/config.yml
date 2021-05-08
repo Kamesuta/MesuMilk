@@ -6,3 +6,4 @@ osu:
   Dev3: 1000
 lava:
   - Dev4
+enable_osu: true
