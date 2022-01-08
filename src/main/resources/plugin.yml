@@ -1,4 +1,3 @@
 name: MesuMilk
 version: ${project.version}
 main: net.teamfruit.mesumilk.MesuMilk
-api-version: 1.15

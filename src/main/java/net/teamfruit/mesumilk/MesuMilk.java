@@ -17,10 +17,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class MesuMilk extends JavaPlugin implements Listener {
     // 牛乳が出る人
@@ -98,6 +95,12 @@ public final class MesuMilk extends JavaPlugin implements Listener {
         Entity entity = event.getRightClicked();
         if (entity instanceof Player) {
             Player target = (Player) entity;
+
+            if (getConfig().getBoolean("other_team")) {
+                Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
+                if (Objects.equals(sb.getEntryTeam(target.getName()), sb.getEntryTeam(me.getName())))
+                    return;
+            }
 
             // メスの場合
             boolean bMesu = mesu.contains(target.getName());
